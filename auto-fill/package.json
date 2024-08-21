@@ -1,0 +1,25 @@
+{
+  "name": "@react-native-harmony-community/auto-fill",
+  "description": "react native harmony community auto fill",
+  "main": "index.ts",
+  "license": "MIT",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "react-native start"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "files": [
+    "src",
+    "harmony",
+    "index.ts",
+    "License",
+    "package.json",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "keywords": ["react-native", "harmony", "auto-fill"]
+}
