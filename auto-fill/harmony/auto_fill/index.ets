@@ -1,1 +1,1 @@
-export * from "./src/main/ets/AutoFillPackage";
+export * from "./ts";

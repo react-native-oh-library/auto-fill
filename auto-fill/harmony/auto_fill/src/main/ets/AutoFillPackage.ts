@@ -5,7 +5,7 @@ import type {
   TurboModule,
   TurboModuleContext,
 } from '@rnoh/react-native-openharmony/ts';
-import { RNC, TM } from "./namespace"
+import { TM } from "./namespace"
 import { AutoFillTurboModule } from './AutoFillTurboModule';
 
 

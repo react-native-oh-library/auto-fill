@@ -1,1 +1,3 @@
-export {default as AutoFillTurboModule} from "./src/NativeAutoFillTurboModule";
+import AutoFill from './src/AutoFill';
+
+export default AutoFill;
