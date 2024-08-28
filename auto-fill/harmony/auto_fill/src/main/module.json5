@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "auto_fill",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

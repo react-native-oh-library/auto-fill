@@ -1,0 +1,10 @@
+demo.zip
+demo/*
+**/.vscode/
+**/node_modules/
+*.code-workspace
+.DS_Store
+*.drawio.*
+build
+*.tgz
+tester/harmony/react_native_openharmony/
