@@ -1,6 +1,6 @@
 import type {RNPackageContext, RNPackage} from '@rnoh/react-native-openharmony/ts';
 
-import {AutoFillPackage} from '@react-native-harmony-community/auto-fill/ts'
+import {AutoFillPackage} from '@react-native-ohos-community/auto-fill/ts';
 
 /**
  * MIT License
@@ -28,7 +28,6 @@ import {AutoFillPackage} from '@react-native-harmony-community/auto-fill/ts'
 
 export function createRNPackages(ctx: RNPackageContext): RNPackage[] {
   return [
-    
     new AutoFillPackage(ctx),
   ];
 }

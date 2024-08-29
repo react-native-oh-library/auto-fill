@@ -1,8 +1,9 @@
 import React from 'react';
-import { Text } from 'react-native';
+import FormComponent from './demo/ContactsComponent';
+import PasswordComponent from './demo/PasswordComponent';
 
 function App() {
-  return <Text>Auto Fill</Text>
+  return <FormComponent />;
 }
 
 export default App;
