@@ -3,7 +3,7 @@
   "description": "react native ohos community auto fill",
   "main": "index.ts",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "typings": "src/NativeAutoFillTurboModule.ts",
   "scripts": {
     "start": "react-native start"
