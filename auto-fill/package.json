@@ -1,6 +1,6 @@
 {
-  "name": "@react-native-harmony-community/auto-fill",
-  "description": "react native harmony community auto fill",
+  "name": "@react-native-ohos-community/auto-fill",
+  "description": "react native ohos community auto fill",
   "main": "index.ts",
   "license": "MIT",
   "version": "0.0.1",
@@ -22,5 +22,5 @@
     "!**/__fixtures__",
     "!**/__mocks__"
   ],
-  "keywords": ["react-native", "harmony", "auto-fill"]
+  "keywords": ["react-native", "ohos", "auto-fill"]
 }

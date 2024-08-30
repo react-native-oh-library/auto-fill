@@ -7,6 +7,5 @@ demo/*
 .DS_Store
 *.drawio.*
 build
-*.tgz
 tester/harmony/react_native_openharmony/
 tester/harmony/auto_fill/

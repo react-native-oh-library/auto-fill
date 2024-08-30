@@ -1,6 +1,8 @@
-# @react-native-harmony-community/auto-fill
+# @react-native-ohos-community/auto-fill
 
-auto-fill 基于 HarmonyOS [autoFillManager](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-app-ability-autofillmanager-V5) 模块，提供输入框自动填充的功能，仅支持 harmony 平台。
+auto-fill 基于 HarmonyOS [autoFillManager](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-app-ability-autofillmanager-V5) 模块，提供将表单输入数据保存到历史表单输入中，以供下次自动填充的功能，仅支持 ohos 平台。
+
+<video controls src="assets/auto-fill-demo.mp4" title="auto-fill-demo" width="200"></video>
 
 ## 1. 目录结构
 
@@ -8,6 +10,7 @@ auto-fill 基于 HarmonyOS [autoFillManager](https://developer.huawei.com/consum
 
 ```yaml
 auto-fill
+├── assets                # README静态资源
 ├── LICENSE
 ├── README.md
 ├── package.json
@@ -19,47 +22,168 @@ auto-fill
 └── tester                # 使用了 auto-fill 的 react-native 示例工程
 ```
 
-## 2. 安装与使用
+## 2. 前提条件
 
-### 2.1. 下载及安装 tgz
+1. **申请接入智能填充服务** 。当前智能填充处于 Beta 阶段，您可通过发送邮件的方式进行申请接入。邮件模板可参考 [智能填充概述-申请接入智能填充服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/scenario-fusion-introduction-to-smart-fill-V5#section1167564853816)
+2. 设备智能填充开关必须处于打开状态，请前往“设置 > 隐私和安全 > 智能填充”打开。  
+   <image src="assets/setting.png" title="setting" width="180"></image>
+3. 设备已连接互联网。
+4. 设备需要登录华为账号。
+5. 业务侧需要给 `TextInput` 组件传入 [`textContentType`](https://reactnative.cn/docs/textinput#textcontenttype) 属性。
 
-请到三方库的 Releases 发布地址查看配套的版本信息：[@react-native-harmony-community/auto-fill Releases](https://github.com/react-native-oh-library/auto-fill/releases)，并下载适用版本的 tgz 包。
+## 3. 下载及安装
+
+请到三方库的 Releases 发布地址查看配套的版本信息：[@react-native-ohos-community/auto-fill Releases](https://github.com/react-native-oh-library/auto-fill/releases)，并下载适用版本的 tgz 包。
 
 进入到 react-native 工程目录安装 tgz 包：
 
 - **npm**
   ```bash
-  npm install @react-native-harmony-community/auto-fill@file:path/to/tgz
+  npm install @react-native-ohos-community/auto-fill@file:path/to/tgz
   ```
 - **yarn**
   ```bash
-  yarn add @react-native-harmony-community/auto-fill@file::path/to/tgz
+  yarn add @react-native-ohos-community/auto-fill@file::path/to/tgz
   ```
 
-### 2.2. 使用场景
+## 4. API 接口说明
 
-<!-- todo 应用申请 -->
-<!-- todo 前提条件 -->
-<!-- todo 示例代码 -->
+auto-fill 仅暴露一个 autoSave 接口，用于保存当前表单信息
 
-## 3. Link
+| API                              | 说明             |                       入参                       | 返回值 |
+| :------------------------------- | ---------------- | :----------------------------------------------: | :----: |
+| autoSave(onSuccess?, onFailure?) | 保存当前表单信息 | (onSuccess?: () => void, onFailure?: () => void) |  void  |
+
+> autoSave 方法在 native 侧限制 2s 内只能调用一次，多次调用将触发 onFailure 方法，并输出 `autoSave called too frequently, please wait for 2 seconds.`
+
+## 5. 使用说明
+
+### 5.1. 基本用法
+
+```tsx
+import React, { useState } from "react";
+import { View, TextInput, Button, StyleSheet } from "react-native";
+import AutoFill from "@react-native-ohos-community/auto-fill";
+
+const MyFormComponent = () => {
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const handleSubmit = () => {
+    AutoFill.autoSave(
+      () => {
+        console.log("AutoFillTurboModule success in js is been called");
+      },
+      () => {
+        console.log("AutoFillTurboModule failed in js is been called");
+      }
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="Full Name"
+        value={fullName}
+        onChangeText={setFullName}
+        autoCapitalize="words"
+        textContentType="name"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Phone Number"
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+        keyboardType="phone-pad"
+        textContentType="telephoneNumber"
+      />
+
+      <Button title="Submit" onPress={handleSubmit} />
+    </View>
+  );
+};
+
+export default MyFormComponent;
+```
+
+<image src="assets/dialog.png" title="dialog" width="180"></image>
+
+初次调用 `AutoFill.autoSave` 将弹出“保存至历史表单输入”半模态窗。
+
+- 点击 “保存信息” 按钮之后，智能填充开关会打开并将表单输入数据保存到历史表单输入中。
+- 点击 “忽略” 按钮后，该设备 24 小时之内不会再次询问。该设备累计忽略 5 次后，半模态中将显示“忽略后不再询问”勾选框，勾选之后点击“忽略”按钮，后续将不再询问。
+
+### 5.2. 常见使用场景
+
+#### 5.2.1. 联系人填充场景
+
+适用于如购票信息、收货信息等联系人数据相关表单，示例代码可查看 [ContactsComponent.tsx](https://github.com/react-native-oh-library/auto-fill/blob/sig/tester/demo/ContactsComponent.tsx)
+
+#### 5.2.2. 账号密码填充场景
+
+适用于如登录界面相关表单，示例代码可查看 [PasswordComponent.tsx](https://github.com/react-native-oh-library/auto-fill/blob/sig/tester/demo/PasswordComponent.tsx)
+
+> 具体密码保存与填充规则请参考：[密码自动填充服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/passwordvault-V5)
+
+### 5.3. ContentType 对应关系
+
+React-Native 侧 TextInput 组件接收的 [textContentType](https://reactnative.cn/docs/textinput#textcontenttype) 类型与 HarmonyOS 中 [ContentType](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/ts-basic-components-textinput-V5#contenttype12%E6%9E%9A%E4%B8%BE%E8%AF%B4%E6%98%8E) 类型映射关系如下，可供参考。
+
+```js
+// key 值为 RN 侧 textContentType 值,
+// value 值为 HarmonyOS 侧 ContentType 值
+{
+    "addressCity": CITY_ADDRESS,  // 市
+    "addressState": PROVINCE_ADDRESS, // 省
+    "countryName": COUNTRY_ADDRESS, // 国家
+    "creditCardNumber": BANK_CARD_NUMBER, // 银行卡号
+    "fullStreetAddress": FULL_STREET_ADDRESS, // 详细地址
+    "sublocality": DISTRICT_ADDRESS, // 区/县
+    "telephoneNumber": PHONE_NUMBER, // 手机号码
+    "username": USER_NAME, // 用户名
+    "password": PASSWORD, // 密码
+    "newPassword": NEW_PASSWORD, // 新密码
+    "houseNumber": HOUSE_NUMBER, // 门牌号
+    "districtAddress": DISTRICT_ADDRESS, // 区/县
+    "cityAddress": CITY_ADDRESS,    // 市
+    "provinceAddress": PROVINCE_ADDRESS,   // 省
+    "countryAddress": COUNTRY_ADDRESS, // 国家
+    "personFullName": PERSON_FULL_NAME, // 姓名
+    "personLastName": PERSON_LAST_NAME, // 姓氏
+    "personFirstName": PERSON_FIRST_NAME, // 名字
+    "phoneNumber": PHONE_NUMBER, // 手机号码
+    "phoneCountryCode": PHONE_COUNTRY_CODE, // 国家代码
+    "fullPhoneNumber": FULL_PHONE_NUMBER, // 包含国家代码的手机号码
+    "emailAddress": EMAIL_ADDRESS, // 邮箱地址
+    "bankCardNumber": BANK_CARD_NUMBER, // 银行卡号
+    "idCardNumber": ID_CARD_NUMBER, // 身份证号
+    "nickName": NICKNAME, // 昵称
+    "name": PERSON_FULL_NAME, // 姓名
+    "familyName": PERSON_LAST_NAME, // 姓氏
+    "givenName": PERSON_FIRST_NAME, // 名字
+    "detailInfoWithoutStreet": DETAIL_INFO_WITHOUT_STREET,// 无街道地址
+    "formatAddress": FORMAT_ADDRESS, // 标准地址
+}
+```
+
+## 6. Link
 
 目前 HarmonyOS 暂不支持 AutoLink，所以 Link 步骤需要手动配置。
 
 首先需要使用 DevEco Studio 打开项目里的 HarmonyOS 工程 `harmony`
 
-### 3.1. 在 harmony 工程根目录的 `oh-package.json5` 添加 overrides 字段
+### 6.1. 在 harmony 工程根目录的 `oh-package.json5` 添加 overrides 字段
 
 ```json
 {
-  ...
   "overrides": {
     "@rnoh/react-native-openharmony" : "./react_native_openharmony"
   }
 }
 ```
 
-### 3.2. 引入原生端代码
+### 6.2. 引入原生端代码
 
 目前有两种方法：
 
@@ -75,7 +199,7 @@ auto-fill
 ```json
 "dependencies": {
     "@rnoh/react-native-openharmony": "file:../react_native_openharmony",
-    "@react-native-harmony-community/auto-fill": "file:../../node_modules/@react-native-harmony-community/auto-fill/harmony/auto-fill.har"
+    "@react-native-ohos-community/auto-fill": "file:../../node_modules/@react-native-ohos-community/auto-fill/harmony/auto_fill.har"
   }
 ```
 
@@ -92,7 +216,7 @@ ohpm install
 
 如需使用直接链接源码，请参考[直接链接源码](https://gitee.com/react-native-oh-library/usage-docs/blob/master/zh-cn/link-source-code.md)说明
 
-### 3.3. 配置 CMakeLists 和引入 xxxPackge
+### 6.3. 配置 CMakeLists 和引入 AutoFillPackage
 
 打开 `entry/src/main/cpp/CMakeLists.txt`，添加：
 
@@ -106,7 +230,7 @@ set(RNOH_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../react-native-har
 set(LOG_VERBOSITY_LEVEL 1)
 
 # RNOH_BEGIN: manual_package_linking_1
-+ add_subdirectory("${OH_MODULES}/@react-native-harmony-community/auto-fill/src/main/cpp" ./auto-fill)
++ add_subdirectory("${OH_MODULES}/@react-native-ohos-community/auto-fill/src/main/cpp" ./auto-fill)
 # RNOH_END: manual_package_linking_1
 
 add_library(rnoh_app SHARED
@@ -128,21 +252,21 @@ add_library(rnoh_app SHARED
 
 using namespace rnoh;
 
-std::vector<std::shared_ptr<Package>> PackageProvider::getPackages(Package::Context ctx) {
-    return {
-        std::make_shared<RNOHGeneratedPackage>(ctx),
+std::vector<std::shared_ptr<Package>> PackageProvider::getPackages(
+    Package::Context ctx) {
+  return {
 +       std::make_shared<AutoFillPackage>(ctx),
-    };
+  };
 }
 ```
 
-### 3.4. 在 ArkTs 侧引入 AutoFillPackage
+### 6.4. 在 ArkTs 侧引入 AutoFillPackage
 
 打开 `entry/src/main/ets/RNPackagesFactory.ts`，添加：
 
 ```diff
   ...
-+ import { AutoFillPackage } from '@react-native-harmony-community/auto-fill/ts'
++ import { AutoFillPackage } from '@react-native-ohos-community/auto-fill/ts'
 
 export function createRNPackages(ctx: RNPackageContext): RNPackage[] {
   return [
@@ -151,6 +275,6 @@ export function createRNPackages(ctx: RNPackageContext): RNPackage[] {
 }
 ```
 
-## 4. 开源协议
+## 7. 开源协议
 
 本项目基于 [The MIT License (MIT)](https://github.com/react-native-oh-library/auto-fill/blob/sig/LICENSE) ，请自由地享受和参与开源。
