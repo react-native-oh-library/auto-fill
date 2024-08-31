@@ -1,8 +1,16 @@
-# @react-native-ohos-community/auto-fill
+<p align="center">
+  <h1 align="center"> <code>@react-native-ohos-community/auto-fill</code> </h1>
+</p>
+<p align="center">
+    <img src="https://img.shields.io/badge/platforms-%20harmony%20-lightgrey.svg" alt="Supported platforms" />
+    <a href="https://github.com/react-native-oh-library/auto-fill/blob/sig/LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" />
+    </a>
+</p>
 
 auto-fill 基于 HarmonyOS [autoFillManager](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-app-ability-autofillmanager-V5) 模块，提供将表单输入数据保存到历史表单输入中，以供下次自动填充的功能，仅支持 ohos 平台。
 
-<video controls src="assets/auto-fill-demo.mp4" title="auto-fill-demo" width="200"></video>
+<video controls src="https://github.com/user-attachments/assets/9c2b3838-d080-47fb-9d05-bd5c13d37b40" title="auto-fill-demo" width="200"></video>
 
 ## 1. 目录结构
 
@@ -33,6 +41,8 @@ auto-fill
 
 ## 3. 下载及安装
 
+### 3.1. 安装 tgz 包
+
 请到三方库的 Releases 发布地址查看配套的版本信息：[@react-native-ohos-community/auto-fill Releases](https://github.com/react-native-oh-library/auto-fill/releases)，并下载适用版本的 tgz 包。
 
 进入到 react-native 工程目录安装 tgz 包：
@@ -46,6 +56,114 @@ auto-fill
   yarn add @react-native-ohos-community/auto-fill@file::path/to/tgz
   ```
 
+### 3.2. Link
+
+目前 HarmonyOS 暂不支持 AutoLink，所以 Link 步骤需要手动配置。
+
+首先需要使用 DevEco Studio 打开项目里的 HarmonyOS 工程 `harmony`
+
+#### 3.2.1. 在 harmony 工程根目录的 `oh-package.json5` 添加 overrides 字段
+
+```json
+{
+  "overrides": {
+    "@rnoh/react-native-openharmony": "./react_native_openharmony"
+  }
+}
+```
+
+#### 3.2.2. 引入原生端代码
+
+目前有两种方法：
+
+1. 通过 har 包引入（在 IDE 完善相关功能后该方法会被遗弃，目前首选此方法）；
+2. 直接链接源码。
+
+方法 1：通过 har 包引入（推荐）
+
+> [!TIP] har 包位于三方库安装路径的 `harmony` 文件夹下。
+
+打开 `entry/oh-package.json5`，添加以下依赖
+
+```json
+"dependencies": {
+    "@rnoh/react-native-openharmony": "file:../react_native_openharmony",
+    "@react-native-ohos-community/auto-fill": "file:../../node_modules/@react-native-ohos-community/auto-fill/harmony/auto_fill.har"
+  }
+```
+
+点击右上角的 `sync` 按钮
+
+或者在终端执行：
+
+```bash
+cd entry
+ohpm install
+```
+
+方法 2：直接链接源码
+
+如需使用直接链接源码，请参考[直接链接源码](https://gitee.com/react-native-oh-library/usage-docs/blob/master/zh-cn/link-source-code.md)说明
+
+#### 3.2.3. 配置 CMakeLists 和引入 AutoFillPackage
+
+打开 `entry/src/main/cpp/CMakeLists.txt`，添加：
+
+```diff
+project(rnapp)
+cmake_minimum_required(VERSION 3.4.1)
+set(CMAKE_SKIP_BUILD_RPATH TRUE)
+...
++ set(OH_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../../../oh_modules")
+set(RNOH_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../react-native-harmony/harmony/cpp")
+set(LOG_VERBOSITY_LEVEL 1)
+
+# RNOH_BEGIN: manual_package_linking_1
++ add_subdirectory("${OH_MODULES}/@react-native-ohos-community/auto-fill/src/main/cpp" ./auto-fill)
+# RNOH_END: manual_package_linking_1
+
+add_library(rnoh_app SHARED
+    ${GENERATED_CPP_FILES}
+    "./PackageProvider.cpp"
+    "${RNOH_CPP_DIR}/RNOHAppNapiBridge.cpp"
+)
+
+# RNOH_BEGIN: manual_package_linking_2
++ target_link_libraries(rnoh_app PUBLIC auto_fill)
+# RNOH_END: manual_package_linking_2
+```
+
+打开 `entry/src/main/cpp/PackageProvider.cpp`，添加：
+
+```diff
+#include "RNOH/PackageProvider.h"
++ #include "AutoFillPackage.h"
+
+using namespace rnoh;
+
+std::vector<std::shared_ptr<Package>> PackageProvider::getPackages(
+    Package::Context ctx) {
+  return {
++       std::make_shared<AutoFillPackage>(ctx),
+  };
+}
+```
+
+#### 3.2.4. 在 ArkTs 侧引入 AutoFillPackage
+
+打开 `entry/src/main/ets/RNPackagesFactory.ts`，添加：
+
+```diff
+  ...
++ import { AutoFillPackage } from '@react-native-ohos-community/auto-fill/ts'
+
+export function createRNPackages(ctx: RNPackageContext): RNPackage[] {
+  return [
++   new AutoFillPackage(ctx),
+  ];
+}
+```
+
 ## 4. API 接口说明
 
 auto-fill 仅暴露一个 autoSave 接口，用于保存当前表单信息
@@ -54,28 +172,28 @@ auto-fill 仅暴露一个 autoSave 接口，用于保存当前表单信息
 | :------------------------------- | ---------------- | :----------------------------------------------: | :----: |
 | autoSave(onSuccess?, onFailure?) | 保存当前表单信息 | (onSuccess?: () => void, onFailure?: () => void) |  void  |
 
-> autoSave 方法在 native 侧限制 2s 内只能调用一次，多次调用将触发 onFailure 方法，并输出 `autoSave called too frequently, please wait for 2 seconds.`
+> autoSave 方法在 native 侧限制 2s 内只能调用一次，多次调用将触发 onFailure 回调，并输出 `autoSave called too frequently, please wait for 2 seconds.`
 
 ## 5. 使用说明
 
 ### 5.1. 基本用法
 
 ```tsx
-import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet } from "react-native";
-import AutoFill from "@react-native-ohos-community/auto-fill";
+import React, { useState } from 'react';
+import { View, TextInput, Button, StyleSheet } from 'react-native';
+import AutoFill from '@react-native-ohos-community/auto-fill';
 
 const MyFormComponent = () => {
-  const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleSubmit = () => {
     AutoFill.autoSave(
       () => {
-        console.log("AutoFillTurboModule success in js is been called");
+        console.log('AutoFillTurboModule success in js is been called');
       },
       () => {
-        console.log("AutoFillTurboModule failed in js is been called");
+        console.log('AutoFillTurboModule failed in js is been called');
       }
     );
   };
@@ -167,114 +285,6 @@ React-Native 侧 TextInput 组件接收的 [textContentType](https://reactnative
 }
 ```
 
-## 6. Link
-
-目前 HarmonyOS 暂不支持 AutoLink，所以 Link 步骤需要手动配置。
-
-首先需要使用 DevEco Studio 打开项目里的 HarmonyOS 工程 `harmony`
-
-### 6.1. 在 harmony 工程根目录的 `oh-package.json5` 添加 overrides 字段
-
-```json
-{
-  "overrides": {
-    "@rnoh/react-native-openharmony" : "./react_native_openharmony"
-  }
-}
-```
-
-### 6.2. 引入原生端代码
-
-目前有两种方法：
-
-1. 通过 har 包引入（在 IDE 完善相关功能后该方法会被遗弃，目前首选此方法）；
-2. 直接链接源码。
-
-方法 1：通过 har 包引入（推荐）
-
-> [!TIP] har 包位于三方库安装路径的 `harmony` 文件夹下。
-
-打开 `entry/oh-package.json5`，添加以下依赖
-
-```json
-"dependencies": {
-    "@rnoh/react-native-openharmony": "file:../react_native_openharmony",
-    "@react-native-ohos-community/auto-fill": "file:../../node_modules/@react-native-ohos-community/auto-fill/harmony/auto_fill.har"
-  }
-```
-
-点击右上角的 `sync` 按钮
-
-或者在终端执行：
-
-```bash
-cd entry
-ohpm install
-```
-
-方法 2：直接链接源码
-
-如需使用直接链接源码，请参考[直接链接源码](https://gitee.com/react-native-oh-library/usage-docs/blob/master/zh-cn/link-source-code.md)说明
-
-### 6.3. 配置 CMakeLists 和引入 AutoFillPackage
-
-打开 `entry/src/main/cpp/CMakeLists.txt`，添加：
-
-```diff
-project(rnapp)
-cmake_minimum_required(VERSION 3.4.1)
-set(CMAKE_SKIP_BUILD_RPATH TRUE)
-...
-+ set(OH_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../../../oh_modules")
-set(RNOH_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../react-native-harmony/harmony/cpp")
-set(LOG_VERBOSITY_LEVEL 1)
-
-# RNOH_BEGIN: manual_package_linking_1
-+ add_subdirectory("${OH_MODULES}/@react-native-ohos-community/auto-fill/src/main/cpp" ./auto-fill)
-# RNOH_END: manual_package_linking_1
-
-add_library(rnoh_app SHARED
-    ${GENERATED_CPP_FILES}
-    "./PackageProvider.cpp"
-    "${RNOH_CPP_DIR}/RNOHAppNapiBridge.cpp"
-)
-
-# RNOH_BEGIN: manual_package_linking_2
-+ target_link_libraries(rnoh_app PUBLIC auto_fill)
-# RNOH_END: manual_package_linking_2
-```
-
-打开 `entry/src/main/cpp/PackageProvider.cpp`，添加：
-
-```diff
-#include "RNOH/PackageProvider.h"
-+ #include "AutoFillPackage.h"
-
-using namespace rnoh;
-
-std::vector<std::shared_ptr<Package>> PackageProvider::getPackages(
-    Package::Context ctx) {
-  return {
-+       std::make_shared<AutoFillPackage>(ctx),
-  };
-}
-```
-
-### 6.4. 在 ArkTs 侧引入 AutoFillPackage
-
-打开 `entry/src/main/ets/RNPackagesFactory.ts`，添加：
-
-```diff
-  ...
-+ import { AutoFillPackage } from '@react-native-ohos-community/auto-fill/ts'
-
-export function createRNPackages(ctx: RNPackageContext): RNPackage[] {
-  return [
-+   new AutoFillPackage(ctx),
-  ];
-}
-```
-
-## 7. 开源协议
+## 6. 开源协议
 
 本项目基于 [The MIT License (MIT)](https://github.com/react-native-oh-library/auto-fill/blob/sig/LICENSE) ，请自由地享受和参与开源。
