@@ -10,7 +10,7 @@
 
 auto-fill 基于 HarmonyOS [autoFillManager](https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/js-apis-app-ability-autofillmanager-V5) 模块，提供将表单输入数据保存到历史表单输入中，以供下次自动填充的功能，仅支持 ohos 平台。
 
-<video controls src="https://github.com/user-attachments/assets/9c2b3838-d080-47fb-9d05-bd5c13d37b40" title="auto-fill-demo" width="200"></video>
+<video controls src="https://github.com/user-attachments/assets/19be83fb-2afb-4a31-9e7f-cba3848a5892" title="auto-fill-demo" width="180"></video>
 
 ## 1. 目录结构
 
@@ -234,13 +234,10 @@ export default MyFormComponent;
 
 ### 5.2. 常见使用场景
 
-#### 5.2.1. 联系人填充场景
-
-适用于如购票信息、收货信息等联系人数据相关表单，示例代码可查看 [ContactsComponent.tsx](https://github.com/react-native-oh-library/auto-fill/blob/sig/tester/demo/ContactsComponent.tsx)
-
-#### 5.2.2. 账号密码填充场景
-
-适用于如登录界面相关表单，示例代码可查看 [PasswordComponent.tsx](https://github.com/react-native-oh-library/auto-fill/blob/sig/tester/demo/PasswordComponent.tsx)
+- 联系人信息填充: 适用于如购票信息、收货信息等联系人数据相关表单
+- 账号密码填充：适用于如登录界面相关表单
+- 页面跳转时表单自动填充
+- 示例代码可查看 [ContactsComponent.tsx](https://github.com/react-native-oh-library/auto-fill/blob/sig/tester/App.tsx)
 
 > 具体密码保存与填充规则请参考：[密码自动填充服务](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/passwordvault-V5)
 

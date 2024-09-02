@@ -18,6 +18,9 @@ add_subdirectory("${RNOH_CPP_DIR}" ./rn)
 
 # RNOH_BEGIN: manual_package_linking_1
 add_subdirectory("${OH_MODULES}/@react-native-ohos-community/auto-fill/src/main/cpp" ./auto-fill)
+add_subdirectory("${OH_MODULES}/@react-native-oh-tpl/react-native-gesture-handler/src/main/cpp" ./gesture-handler)
+add_subdirectory("${OH_MODULES}/@react-native-oh-tpl/react-native-safe-area-context/src/main/cpp" ./safe-area)
+
 # RNOH_END: manual_package_linking_1
 
 file(GLOB GENERATED_CPP_FILES "${CMAKE_CURRENT_SOURCE_DIR}/generated/*.cpp") # this line is needed by codegen v1
@@ -31,4 +34,7 @@ target_link_libraries(rnoh_app PUBLIC rnoh)
 
 # RNOH_BEGIN: manual_package_linking_2
 target_link_libraries(rnoh_app PUBLIC auto_fill)
+target_link_libraries(rnoh_app PUBLIC rnoh_gesture_handler)
+target_link_libraries(rnoh_app PUBLIC rnoh_safe_area)
+
 # RNOH_END: manual_package_linking_2

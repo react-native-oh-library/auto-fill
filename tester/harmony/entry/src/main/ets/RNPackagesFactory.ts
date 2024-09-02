@@ -1,5 +1,6 @@
 import type {RNPackageContext, RNPackage} from '@rnoh/react-native-openharmony/ts';
-
+import { GestureHandlerPackage } from '@react-native-oh-tpl/react-native-gesture-handler/ts';
+import {SafeAreaViewPackage} from '@react-native-oh-tpl/react-native-safe-area-context/ts';
 import {AutoFillPackage} from '@react-native-ohos-community/auto-fill/ts';
 
 /**
@@ -29,5 +30,8 @@ import {AutoFillPackage} from '@react-native-ohos-community/auto-fill/ts';
 export function createRNPackages(ctx: RNPackageContext): RNPackage[] {
   return [
     new AutoFillPackage(ctx),
+    new GestureHandlerPackage(ctx),
+    new SafeAreaViewPackage(ctx)
+
   ];
 }
