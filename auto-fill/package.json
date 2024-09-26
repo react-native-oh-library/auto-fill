@@ -2,7 +2,7 @@
   "name": "@react-native-ohos-community/auto-fill",
   "description": "react native ohos community auto fill",
   "main": "index.ts",
-  "license": "MIT",
+  "license": "Apache License 2.0",
   "version": "1.0.0",
   "typings": "src/NativeAutoFillTurboModule.ts",
   "scripts": {

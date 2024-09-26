@@ -4,7 +4,7 @@
 <p align="center">
     <img src="https://img.shields.io/badge/platforms-%20harmony%20-lightgrey.svg" alt="Supported platforms" />
     <a href="https://github.com/react-native-oh-library/auto-fill/blob/sig/LICENSE">
-        <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" />
+        <img src="https://img.shields.io/badge/license-Apache-red.svg" alt="License" />
     </a>
 </p>
 
@@ -284,4 +284,4 @@ React-Native 侧 TextInput 组件接收的 [textContentType](https://reactnative
 
 ## 6. 开源协议
 
-本项目基于 [The MIT License (MIT)](https://github.com/react-native-oh-library/auto-fill/blob/sig/LICENSE) ，请自由地享受和参与开源。
+本项目基于 [The Apache License 2.0](https://github.com/react-native-oh-library/auto-fill/blob/sig/LICENSE) ，请自由地享受和参与开源。
