@@ -7,6 +7,8 @@
     "start": "npm run codegen && hdc rport tcp:8081 tcp:8081 && react-native start",
     "codegen": "react-native codegen-harmony --rnoh-module-path ./harmony/entry/oh_modules/@rnoh/react-native-openharmony",
     "dev": "npm run codegen && react-native bundle-harmony --dev --minify=false",
+    "pack:pkg": "cd ../auto-fill && npm pack && cd ../tester",
+    "install:pkg": "npm run pack:pkg && npm i @react-native-ohos-community/auto-fill@file:../auto-fill/react-native-ohos-community-auto-fill-1.0.1.tgz",
     "postinstall": "node ./scripts/create-build-profile"
   },
   "dependencies": {
